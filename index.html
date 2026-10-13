@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>림 서바이벌 - 개척지 생존기</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div id="time"></div>
+    <div id="resources"></div>
+    <div id="speed"></div>
+    <div id="menu">
+      <button data-act="worktab" title="작업 우선순위">📋 작업</button>
+      <button data-act="temp" title="온도 오버레이 (T)">🌡 온도</button>
+      <button data-act="save">💾 저장</button>
+      <button data-act="load">📂 불러오기</button>
+      <button data-act="new">🆕 새 게임</button>
+      <button data-act="help">❓</button>
+    </div>
+  </header>
+  <main>
+    <aside id="colonists"></aside>
+    <div id="view">
+      <canvas id="game"></canvas>
+      <div id="pause-ind" class="hidden">⏸ 일시정지 (Space)</div>
+      <div id="flash"></div>
+      <div id="log"></div>
+      <div id="info" class="hidden"></div>
+      <div id="hover"></div>
+    </div>
+  </main>
+  <footer id="buildbar">
+    <div id="cats"></div>
+    <div id="tools"></div>
+  </footer>
+</div>
+
+<div id="modal" class="overlay hidden">
+  <div class="box">
+    <h2 id="modal-title"></h2>
+    <p id="modal-text"></p>
+    <div id="modal-btns"></div>
+  </div>
+</div>
+
+<div id="worktab" class="overlay hidden">
+  <div class="box wide">
+    <h2>📋 작업 배정</h2>
+    <div id="work-body"></div>
+    <button data-act="closework">닫기</button>
+  </div>
+</div>
+
+<div id="help" class="overlay hidden">
+  <div class="box wide">
+    <h2>❓ 도움말</h2>
+    <div class="help-grid">
+      <div>
+        <h4>조작</h4>
+        <ul>
+          <li><b>WASD / 방향키 / 드래그</b>: 화면 이동, <b>휠</b>: 확대/축소</li>
+          <li><b>클릭</b>: 선택, <b>Tab</b>: 다음 정착민</li>
+          <li><b>Space</b>: 일시정지, <b>1/2/3</b>: 속도</li>
+          <li><b>F</b>: 선택 정착민 소집, <b>R</b>: 전원 소집</li>
+          <li><b>우클릭</b>(소집 상태): 이동 / 적 클릭 시 공격</li>
+          <li><b>우클릭/Esc</b>: 도구 취소, <b>T</b>: 온도 보기</li>
+          <li>하단 메뉴에서 도구를 고르고 <b>드래그</b>하여 지정</li>
+        </ul>
+        <h4>생존 신호</h4>
+        <ul>
+          <li><b>허기</b>: 비축된 식사/날음식을 먹습니다. 0이 되면 굶주림 피해.</li>
+          <li><b>수면</b>: 밤(22~6시)에 침대에서 잡니다. 침대 없으면 바닥에서 (기분↓).</li>
+          <li><b>체온</b>: 쾌적 범위를 벗어나면 저체온증/열사병 → 피해. 파카와 난방된 방이 필요.</li>
+          <li><b>기분</b>: 너무 낮으면 정신이상으로 방황합니다.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>공략 팁</h4>
+        <ul>
+          <li>먼저 <b>벌목</b>을 지정하고 나무 벽 + 문 으로 작은 방을 만드세요.</li>
+          <li>방 안에 <b>침대</b>를, 근처에 <b>모닥불</b>(요리)을 두세요.</li>
+          <li>모닥불을 선택해 <b>식사</b> 작업을 관리하세요. (기본 10개 유지)</li>
+          <li><b>재배 구역</b>을 만들어 쌀을 키우세요. 겨울엔 자라지 않습니다.</li>
+          <li><b>사냥</b>으로 고기와 가죽을 얻고, 가죽으로 <b>파카</b>를 만드세요.</li>
+          <li>약초를 채집해 작업대에서 <b>약품</b>을 만들어 두세요.</li>
+          <li><b>모래주머니</b> 뒤에서 싸우면 피격률이 크게 줄어듭니다.</li>
+          <li>강철을 채굴해 <b>방어 터렛</b>과 <b>난방기</b>를 지으세요.</li>
+          <li>벽으로 완전히 둘러싸인 공간만 '방'(실내)으로 인정됩니다.</li>
+        </ul>
+      </div>
+    </div>
+    <button data-act="closehelp">닫기</button>
+  </div>
+</div>
+
+<div id="gameover" class="overlay hidden">
+  <div class="box">
+    <h2>💀 정착지 전멸</h2>
+    <p id="go-text"></p>
+    <button data-act="restart">다시 시작</button>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/world.js"></script>
+<script src="js/path.js"></script>
+<script src="js/units.js"></script>
+<script src="js/events.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
