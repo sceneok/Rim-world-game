@@ -458,7 +458,8 @@ function setupInput() {
 }
 function resize() {
   const r = $('view').getBoundingClientRect();
-  canvas.width = Math.floor(r.width); canvas.height = Math.floor(r.height);
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  canvas.width = Math.floor(r.width * DPR); canvas.height = Math.floor(r.height * DPR);
   clampCam();
 }
 function panKeys(dtSec) {
