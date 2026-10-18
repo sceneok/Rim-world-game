@@ -257,7 +257,7 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
     <ul>
       <li><span>이동</span><span>땅 클릭(누르고 있으면 따라감) · WASD</span></li>
       <li><span>행동</span><span>나무·바위·공룡 클릭 — 다가가서 자동 반복</span></li>
-      <li><span>시점</span><span>고정 쿼터뷰 · 휠로 줌</span></li>
+      <li><span>시점</span><span>고정 쿼터뷰 · 휠로 줌 · 캐릭터를 가리는 나무는 투명해져요</span></li>
       <li><span>달리기·점프</span><span>Shift · Space</span></li>
       <li><span>가방·제작</span><span>C — 도구, 모닥불, 울타리, 움막</span></li>
     </ul>
@@ -311,13 +311,14 @@ renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.
 $('game').appendChild(renderer.domElement);
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0xa9c3cf);
-scene.fog=new THREE.Fog(0xa9c3cf,55,230);
-const camera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,.1,1200);
+scene.fog=new THREE.Fog(0xa9c3cf,80,280);
+const camera=new THREE.PerspectiveCamera(30,innerWidth/innerHeight,.5,1400);
+const fitFov=()=>{camera.fov=innerWidth<innerHeight?44:28;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()};fitFov();
 const hemi=new THREE.HemisphereLight(0xd3dde2,0x5a4a30,1.0);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffe2b8,3.0);
 sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048);
-Object.assign(sun.shadow.camera,{left:-38,right:38,top:38,bottom:-38,near:1,far:220});
+Object.assign(sun.shadow.camera,{left:-44,right:44,top:44,bottom:-44,near:1,far:240});
 sun.shadow.radius=3;
 sun.shadow.bias=-.0006;sun.shadow.normalBias=.03;
 scene.add(sun,sun.target);
@@ -362,6 +363,22 @@ const skinTex=detailTex(256,(i,j,S)=>{let n=0,a=.5,f=16;for(let k=0;k<3;k++){n+=
   const cell=tnoise(i/S*48,j/S*48,48);return .72+n*.3+(cell>.6?-.08:0)+(hash2(i,j)-.5)*.06},2);
 const propMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.95});
 const rockMat=new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:1});
+const occl={uP:{value:new THREE.Vector2(-1e4,-1e4)},uR:{value:120},uD:{value:0}};
+propMat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,occl);
+  sh.fragmentShader=sh.fragmentShader.replace('void main() {',`uniform vec2 uP;uniform float uR;uniform float uD;
+void main() {
+  { float d=distance(gl_FragCoord.xy,uP)/uR;
+    if(d<1.0&&vViewPosition.z<uD-1.5){ float a=smoothstep(.45,1.,d);
+      float h=fract(sin(dot(floor(gl_FragCoord.xy),vec2(12.9898,78.233)))*43758.5453); if(h>a*.85) discard; } }`)};
+const _oc=new THREE.Vector3();
+function updateOcclusion(){
+  if(!started||player.dead){occl.uP.value.set(-1e4,-1e4);return}
+  const pr=renderer.getPixelRatio();
+  _oc.set(player.x,player.y+1,player.z).project(camera);
+  occl.uP.value.set((_oc.x*.5+.5)*innerWidth*pr,(_oc.y*.5+.5)*innerHeight*pr);
+  occl.uR.value=Math.min(innerWidth,innerHeight)*pr*.14;
+  _oc.set(player.x,player.y+1,player.z).applyMatrix4(camera.matrixWorldInverse);occl.uD.value=-_oc.z;
+}
 const matCache={};
 const mat=c=>matCache[c]||(matCache[c]=new THREE.MeshStandardMaterial({color:c,map:skinTex,roughness:.88}));
 function mk(geo,c,x=0,y=0,z=0,rx=0,ry=0,rz=0){const m=new THREE.Mesh(geo,mat(c));m.position.set(x,y,z);m.rotation.set(rx,ry,rz);m.castShadow=true;return m}
@@ -1107,7 +1124,7 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyE'||e.code==='KeyF')actionHeld=false});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;actionHeld=false});
 const ISO_YAW=Math.PI/4;
-const cam={yaw:ISO_YAW,pitch:.98,dist:24};
+const cam={yaw:ISO_YAW,pitch:1.05,dist:38};
 // ray-march the camera ray against the analytic terrain (cheaper than raycasting the mesh)
 const _ray=new THREE.Raycaster(),_ndc=new THREE.Vector2();
 function groundAt(cx,cy){
@@ -1152,7 +1169,7 @@ const endHold=e=>{if(mouseHeld?.id===e.pointerId)mouseHeld=null};
 cv.addEventListener('pointerup',endHold);cv.addEventListener('pointercancel',endHold);
 cv.addEventListener('pointerleave',()=>{lastPointer=null;hoverTarget=null});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
-cv.addEventListener('wheel',e=>{e.preventDefault();cam.dist=clamp(cam.dist+e.deltaY*.02,14,36)},{passive:false});
+cv.addEventListener('wheel',e=>{e.preventDefault();cam.dist=clamp(cam.dist+e.deltaY*.03,24,56)},{passive:false});
 // hold-to-follow: keep steering toward the cursor while the button is down; refresh hover for the prompt
 function updatePointer(dt){
   if(!started)return;
@@ -1279,7 +1296,7 @@ function applySave(d){
   player.y=heightAt(player.x,player.z);
   for(const b of buildings.splice(0))scene.remove(b.mesh);
   for(const[t,x,z,yaw]of d.b||[])if(BUILD[t])addBuilding(t,x,z,yaw);
-  world.time=d.time??.08;world.day=d.day??1;if(d.cam?.dist)cam.dist=clamp(d.cam.dist,14,36);
+  world.time=d.time??.08;world.day=d.day??1;
   pm.armor.visible=tools.armor;invDirty=true;
 }
 
@@ -1291,7 +1308,7 @@ function startGame(data){
   if(data)applySave(data);
   else{resetState();for(const b of buildings.splice(0))scene.remove(b.mesh);
     Object.assign(player,{x:SPAWN.x,z:SPAWN.z,yaw:Math.PI,hp:100,hunger:100,stamina:100,spawn:{...SPAWN},dead:false});
-    player.y=heightAt(SPAWN.x,SPAWN.z);world.time=.08;world.day=1;cam.yaw=ISO_YAW;cam.pitch=.98;cam.dist=24}
+    player.y=heightAt(SPAWN.x,SPAWN.z);world.time=.08;world.day=1;cam.yaw=ISO_YAW;cam.pitch=1.05;cam.dist=38}
   player.dead=false;started=true;wasNight=isNight();
   for(const d of dinos)if(Math.hypot(d.x-player.x,d.z-player.z)<25&&d.T.beh!=='skittish')d.remove();
   renderHotbar();updateQuest();
@@ -1304,7 +1321,7 @@ if(loadSave())$('btnCont').hidden=false;
 setInterval(save,20000);
 addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 addEventListener('beforeunload',save);
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+addEventListener('resize',()=>{fitFov();renderer.setSize(innerWidth,innerHeight)});
 
 /* ================= update ================= */
 function updatePlayer(dt){
@@ -1424,7 +1441,7 @@ function updateCamera(dt,time){
   const k=1-Math.exp(-dt*(started?12:2));
   camera.position.x=lerp(camera.position.x,cx,k);camera.position.y=lerp(camera.position.y,cy,k);camera.position.z=lerp(camera.position.z,cz,k);
   if(camShake>0){camShake-=dt;const s=camShake*.6;camera.position.x+=(Math.random()-.5)*s;camera.position.y+=(Math.random()-.5)*s}
-  camera.lookAt(tx,ty,tz);
+  camera.lookAt(tx,ty,tz);camera.updateMatrixWorld();updateOcclusion();
 }
 function updateFires(time){
   let best=null,bd=60;
