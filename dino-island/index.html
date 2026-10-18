@@ -36,7 +36,24 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:6px;box-shadow:0 6px 18px #0009,inset 0 1px 0 #ffffff12}
 
 /* stats */
-#stats{position:absolute;left:calc(12px + env(safe-area-inset-left,0px));top:calc(12px + env(safe-area-inset-top,0px));padding:10px 12px;width:min(250px,46vw);display:flex;flex-direction:column;gap:7px;pointer-events:none}
+#leftcol{position:absolute;left:calc(12px + env(safe-area-inset-left,0px));top:calc(12px + env(safe-area-inset-top,0px));width:min(250px,46vw);display:flex;flex-direction:column;gap:8px;pointer-events:none}
+#stats{padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+#mats{padding:8px 10px 10px}
+#mats .mh{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--brass);margin-bottom:6px}
+#matGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.mat{display:flex;align-items:center;gap:5px;padding:3px 5px;border-radius:3px;background:#00000055;border:1px solid #d2a24c22;min-width:0}
+.mat .e{font-size:16px;line-height:1}
+.mat .t{display:flex;flex-direction:column;min-width:0;line-height:1.1}
+.mat .t small{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mat .t b{font-size:14px;font-variant-numeric:tabular-nums}
+.mat.zero{opacity:.38}
+.mat.up{animation:pop .7s ease-out}
+.mat.down{animation:drop .7s ease-out}
+@keyframes pop{0%{background:#d2a24c99;transform:scale(1.08)}100%{background:#00000055;transform:none}}
+@keyframes drop{0%{background:#b8323c88}100%{background:#00000055}}
+#marker{position:absolute;width:28px;height:14px;margin:-7px 0 0 -14px;border:2px solid var(--brass);border-radius:50%;pointer-events:none;opacity:0}
+#marker.on{animation:mk .6s ease-out}
+@keyframes mk{0%{opacity:1;transform:scale(.4)}100%{opacity:0;transform:scale(1.4)}}
 .bar{display:flex;align-items:center;gap:7px;font-size:12px}
 .bar .ic{width:18px;text-align:center;font-size:13px}
 .track{flex:1;height:9px;border-radius:2px;background:#00000080;box-shadow:inset 0 1px 2px #000;overflow:hidden}
@@ -91,7 +108,7 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 .rb.sm{font-size:16px;padding:7px 10px;border-color:var(--line)}
 .rb:active{transform:translateY(1px)}
 
-#hint{position:absolute;left:calc(12px + env(safe-area-inset-left,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));font-size:11px;line-height:1.6;color:#efe3c8cc;text-shadow:0 1px 2px #000;max-width:230px;pointer-events:none}
+#hint{position:absolute;left:calc(12px + env(safe-area-inset-left,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));font-size:11px;line-height:1.6;color:#efe3c8cc;text-shadow:0 1px 2px #000;max-width:300px;pointer-events:none}
 
 /* placement bar */
 #placebar{position:absolute;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:8px 10px;display:flex;gap:8px;align-items:center;font-size:13px;flex-wrap:wrap;justify-content:center;width:max-content;max-width:calc(100vw - 32px)}
@@ -166,6 +183,7 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
   body:not(.touch) #rbtns{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 }
 @media (max-width:520px){
+  .mat .t small{display:none}
   #minimap{width:96px;height:96px}
   #clock{font-size:11px}
   .slot{width:44px;height:44px;font-size:21px}
@@ -179,18 +197,22 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 
 <div id="hud" hidden>
   <div id="vignette"></div>
+  <div id="leftcol">
   <div id="stats" class="card">
     <div class="bar hp"><span class="ic">❤️</span><div class="track"><i id="hpBar"></i></div><b id="hpNum">100</b></div>
     <div class="bar hg"><span class="ic">🍗</span><div class="track"><i id="hgBar"></i></div><b id="hgNum">100</b></div>
     <div class="bar st"><span class="ic">⚡</span><div class="track"><i id="stBar"></i></div><b id="stNum">100</b></div>
     <div id="quest"><span class="ql">목표</span><span id="questText"></span></div>
   </div>
+  <div id="mats" class="card"><div class="mh">재료</div><div id="matGrid"></div></div>
+  </div>
   <div id="mapbox"><canvas id="minimap" width="150" height="150"></canvas><div id="clock" class="card"></div></div>
   <div id="toasts"></div>
   <div id="prompt" hidden><div class="pn" id="pName"></div><div class="phb" id="pHb" hidden><i id="pHbI"></i></div><div class="pk" id="pKey"></div></div>
   <div id="floats"></div>
+  <div id="marker"></div>
   <div id="hotbar" class="card"></div>
-  <div id="hint">WASD 이동 · 드래그 시점 · 휠 줌<br>클릭/E 행동 · Shift 달리기 · Space 점프<br>1~4 먹기·사용 · C 가방/제작</div>
+  <div id="hint">클릭: 이동 · 대상 클릭: 채집/공격 · 휠: 줌<br>WASD 이동 · E 행동 · Shift 달리기 · Space 점프<br>1~4 먹기·사용 · C 가방/제작</div>
   <div id="rbtns">
     <button class="rb sm" id="soundBtn" title="소리 켜기/끄기">🔊</button>
     <button class="rb" id="bagBtn" title="가방 · 제작 (C)">🎒<small>제작 C</small></button>
@@ -233,9 +255,9 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
       <button class="btn alt" id="btnCont" hidden>이어하기</button>
     </div>
     <ul>
-      <li><span>이동</span><span>WASD · 방향키 (폰: 왼쪽 조이스틱)</span></li>
-      <li><span>시점</span><span>마우스 드래그 · 휠로 줌</span></li>
-      <li><span>행동</span><span>클릭 또는 E — 벌목·채굴·채집·사냥</span></li>
+      <li><span>이동</span><span>땅 클릭(누르고 있으면 따라감) · WASD</span></li>
+      <li><span>행동</span><span>나무·바위·공룡 클릭 — 다가가서 자동 반복</span></li>
+      <li><span>시점</span><span>고정 쿼터뷰 · 휠로 줌</span></li>
       <li><span>달리기·점프</span><span>Shift · Space</span></li>
       <li><span>가방·제작</span><span>C — 도구, 모닥불, 울타리, 움막</span></li>
     </ul>
@@ -769,7 +791,8 @@ function cancelPlacing(){if(!placing)return;scene.remove(placing.mesh);placing=n
 function updatePlacing(){
   if(!placing)return;const B=BUILD[placing.type];
   const yaw=Math.round(player.yaw/(Math.PI/8))*(Math.PI/8)+placing.rot;
-  const x=player.x+Math.sin(player.yaw)*B.dist,z=player.z+Math.cos(player.yaw)*B.dist;
+  let x=player.x+Math.sin(player.yaw)*B.dist,z=player.z+Math.cos(player.yaw)*B.dist;
+  if(cursorPt&&!isTouch){const dx=cursorPt.x-player.x,dz=cursorPt.z-player.z,d=Math.hypot(dx,dz),m=Math.min(d,10);if(d>.5){x=player.x+dx/d*m;z=player.z+dz/d*m}}
   let ok=true;
   for(const[sx,sz,sr]of B.samples){
     const w=localToWorld(sx,sz,yaw),px=x+w[0],pz=z+w[1];
@@ -1015,14 +1038,14 @@ function sleep(b){
   },900);
 }
 function die(){
-  player.dead=true;player.hp=0;
+  player.dead=true;player.hp=0;player.order=null;
   const lost=[];for(const k of['wood','stone','fiber','berry','meat','cooked','hide','bone']){const n=Math.floor(inv[k]/2);if(n>0){inv[k]-=n;lost.push(`${ITEMS[k].i}${n}`)}}
   invDirty=true;cancelPlacing();
   $('deathText').textContent=lost.length?`잃어버린 자원: ${lost.join(' ')}`:'다행히 잃은 자원이 없어요.';
   setTimeout(()=>$('death').hidden=false,900);
 }
 function respawn(){
-  $('death').hidden=true;player.dead=false;player.hp=60;player.hunger=Math.max(player.hunger,50);player.stamina=100;
+  $('death').hidden=true;player.dead=false;player.order=null;player.hp=60;player.hunger=Math.max(player.hunger,50);player.stamina=100;
   player.x=player.spawn.x;player.z=player.spawn.z;player.y=heightAt(player.x,player.z)+1;player.vy=0;
   for(const d of dinos){d.angry=0;if(d.state==='chase')d.state='wander'}
   pm.root.rotation.set(0,0,0);save();
@@ -1083,16 +1106,60 @@ addEventListener('keydown',e=>{
 });
 addEventListener('keyup',e=>{keys[e.code]=false;if(e.code==='KeyE'||e.code==='KeyF')actionHeld=false});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false;actionHeld=false});
-const cam={yaw:0,pitch:.92,dist:17};
-let drag=null;
+const ISO_YAW=Math.PI/4;
+const cam={yaw:ISO_YAW,pitch:.98,dist:24};
+// ray-march the camera ray against the analytic terrain (cheaper than raycasting the mesh)
+const _ray=new THREE.Raycaster(),_ndc=new THREE.Vector2();
+function groundAt(cx,cy){
+  _ndc.set(cx/innerWidth*2-1,-(cy/innerHeight)*2+1);_ray.setFromCamera(_ndc,camera);
+  const o=_ray.ray.origin,d=_ray.ray.direction;let prev=0;
+  for(let t=1;t<260;t+=.6){const y=o.y+d.y*t,h=Math.max(heightAt(o.x+d.x*t,o.z+d.z*t),-.3);
+    if(y<=h){let lo=prev,hi=t;for(let i=0;i<8;i++){const m=(lo+hi)/2;if(o.y+d.y*m<=Math.max(heightAt(o.x+d.x*m,o.z+d.z*m),-.3))hi=m;else lo=m}
+      return{x:o.x+d.x*hi,y:o.y+d.y*hi,z:o.z+d.z*hi}}
+    prev=t}
+  return null;
+}
+// the interactable nearest a ground point (dinos are tall, so be generous with them)
+function pickAt(pt){
+  let best=null,bd=1e9;
+  const c=(obj,x,z,r)=>{const d=Math.hypot(x-pt.x,z-pt.z)-r;if(d<1.2&&d<bd){bd=d;best=obj}};
+  for(const d of dinos)if(!d.dead&&Math.abs(d.x-pt.x)<14&&Math.abs(d.z-pt.z)<14)c({dino:d},d.x,d.z,d.T.radius+.6);
+  for(const n of nodes)if(n.active&&Math.abs(n.x-pt.x)<4&&Math.abs(n.z-pt.z)<4)c({node:n},n.x,n.z,n.r||.9);
+  for(const b of buildings)if(b.type!=='fence'&&Math.abs(b.x-pt.x)<5&&Math.abs(b.z-pt.z)<5)c({b},b.x,b.z,b.type==='shelter'?2:.9);
+  return best;
+}
+const sameTarget=(a,b)=>a&&b&&(a.dino?a.dino===b.dino:a.node?a.node===b.node:a.b===b.b);
+let mouseHeld=null,cursorPt=null,hoverTarget=null,hoverTick=0,lastPointer=null;
+function showMarker(cx,cy){const m=$('marker');m.style.left=cx+'px';m.style.top=cy+'px';m.classList.remove('on');void m.offsetWidth;m.classList.add('on')}
+function orderAt(cx,cy,fresh){
+  const pt=groundAt(cx,cy);if(!pt)return;
+  const t=pickAt(pt);
+  if(t){if(fresh||!player.order?.t)player.order={t};}
+  else if(fresh||!player.order?.t){player.order={x:pt.x,z:pt.z,stuck:0,best:1e9};if(fresh)showMarker(cx,cy)}
+}
 const cv=renderer.domElement;
-cv.addEventListener('pointerdown',e=>{initAudio();if(drag)return;drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:0,t:performance.now(),btn:e.button};cv.setPointerCapture(e.pointerId)});
-cv.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;drag.moved+=Math.abs(dx)+Math.abs(dy);
-  cam.yaw-=dx*.006;cam.pitch=clamp(cam.pitch+dy*.004,.25,1.35)});
-const endDrag=e=>{if(!drag||drag.id!==e.pointerId)return;if(drag.moved<8&&drag.btn===0&&performance.now()-drag.t<400)doAction();drag=null};
-cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',e=>{if(drag?.id===e.pointerId)drag=null});
+cv.addEventListener('pointerdown',e=>{
+  initAudio();if(!started||uiOpen()||player.dead)return;
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  if(placing){if(e.pointerType==='mouse'){lastPointer={x:e.clientX,y:e.clientY};cursorPt=groundAt(e.clientX,e.clientY)}confirmPlace();return}
+  mouseHeld={id:e.pointerId,x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);orderAt(e.clientX,e.clientY,true);
+});
+cv.addEventListener('pointermove',e=>{
+  if(e.pointerType==='mouse'){lastPointer={x:e.clientX,y:e.clientY}}
+  if(mouseHeld&&mouseHeld.id===e.pointerId){mouseHeld.x=e.clientX;mouseHeld.y=e.clientY}
+});
+const endHold=e=>{if(mouseHeld?.id===e.pointerId)mouseHeld=null};
+cv.addEventListener('pointerup',endHold);cv.addEventListener('pointercancel',endHold);
+cv.addEventListener('pointerleave',()=>{lastPointer=null;hoverTarget=null});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
-cv.addEventListener('wheel',e=>{e.preventDefault();cam.dist=clamp(cam.dist+e.deltaY*.015,6,32)},{passive:false});
+cv.addEventListener('wheel',e=>{e.preventDefault();cam.dist=clamp(cam.dist+e.deltaY*.02,14,36)},{passive:false});
+// hold-to-follow: keep steering toward the cursor while the button is down; refresh hover for the prompt
+function updatePointer(dt){
+  if(!started)return;
+  if(mouseHeld&&!player.order?.t)orderAt(mouseHeld.x,mouseHeld.y,false);
+  hoverTick-=dt;
+  if(lastPointer&&hoverTick<=0){hoverTick=.1;cursorPt=groundAt(lastPointer.x,lastPointer.y);hoverTarget=cursorPt&&!placing?pickAt(cursorPt):null;cv.style.cursor=hoverTarget?'pointer':''}
+}
 // joystick
 {
   const st=$('stick'),kn=$('knob');let sid=null;
@@ -1132,7 +1199,17 @@ function renderPanel(){
   $('recipes').querySelectorAll('button[data-r]').forEach(b=>b.onclick=()=>{initAudio();craft(RECIPES[+b.dataset.r])});
 }
 const HOT=[['berry','1'],['cooked','2'],['meat','3'],['bandage','4']];
+const MATS=['wood','stone','fiber','hide','bone','meat','berry','cooked','bandage'];
+const lastMat={};
+function renderMats(){
+  const g=$('matGrid');
+  if(!g.children.length)g.innerHTML=MATS.map(k=>`<div class="mat" data-k="${k}" title="${ITEMS[k].n}"><span class="e">${ITEMS[k].i}</span><span class="t"><small>${ITEMS[k].n}</small><b>0</b></span></div>`).join('');
+  for(const el of g.children){const k=el.dataset.k,n=inv[k];el.querySelector('b').textContent=n;el.classList.toggle('zero',!n);
+    if(lastMat[k]!==undefined&&lastMat[k]!==n){const c=n>lastMat[k]?'up':'down';el.classList.remove('up','down');void el.offsetWidth;el.classList.add(c)}
+    lastMat[k]=n}
+}
 function renderHotbar(){
+  renderMats();
   $('hotbar').innerHTML=HOT.map(([k,key])=>`<button class="slot ${inv[k]?'':'empty'}" data-k="${k}" title="${ITEMS[k].n} 사용 (${key})"><span class="k">${key}</span>${ITEMS[k].i}<span class="n">${inv[k]}</span></button>`).join('')
     +'<div class="sep"></div>'+RECIPES.filter(r=>r.tool).map(r=>`<div class="tool ${tools[r.tool]?'on':''}" title="${r.name}">${r.icon}</div>`).join('');
   $('hotbar').querySelectorAll('.slot').forEach(b=>b.onclick=()=>{initAudio();useItem(b.dataset.k)});
@@ -1154,9 +1231,9 @@ function updateClock(){
   $('clock').textContent=`${isNight()?'🌙':'☀️'} ${world.day}일차 ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
 }
 function updatePrompt(){
-  const t=player.target,el=$('prompt');
+  const t=hoverTarget||player.order?.t||player.target,el=$('prompt');
   if(!t||player.dead||placing||!started){el.hidden=true;return}
-  const key=isTouch?'✊ 버튼':'클릭 / E';let name='',hb=null,res=false,y=1.5,x,z;
+  const key=isTouch?'탭 / ✊ 버튼':'클릭';let name='',hb=null,res=false,y=1.5,x,z;
   if(t.dino){const d=t.dino;name=`${d.T.name}${d.T.beh==='aggressive'?' ⚠️':''}`;hb=d.hp/d.T.hp;y=d.g.position.y+d.T.tag;x=d.x;z=d.z}
   else if(t.node){const n=t.node;x=n.x;z=n.z;
     if(n.kind==='tree'){name=tools.axe?'🪓 벌목':'✊ 벌목 (도끼가 있으면 빨라요)';y=n.y+3.2*n.s}
@@ -1202,7 +1279,7 @@ function applySave(d){
   player.y=heightAt(player.x,player.z);
   for(const b of buildings.splice(0))scene.remove(b.mesh);
   for(const[t,x,z,yaw]of d.b||[])if(BUILD[t])addBuilding(t,x,z,yaw);
-  world.time=d.time??.08;world.day=d.day??1;if(d.cam)Object.assign(cam,d.cam);
+  world.time=d.time??.08;world.day=d.day??1;if(d.cam?.dist)cam.dist=clamp(d.cam.dist,14,36);
   pm.armor.visible=tools.armor;invDirty=true;
 }
 
@@ -1214,7 +1291,7 @@ function startGame(data){
   if(data)applySave(data);
   else{resetState();for(const b of buildings.splice(0))scene.remove(b.mesh);
     Object.assign(player,{x:SPAWN.x,z:SPAWN.z,yaw:Math.PI,hp:100,hunger:100,stamina:100,spawn:{...SPAWN},dead:false});
-    player.y=heightAt(SPAWN.x,SPAWN.z);world.time=.08;world.day=1;cam.yaw=0;cam.pitch=.92;cam.dist=17}
+    player.y=heightAt(SPAWN.x,SPAWN.z);world.time=.08;world.day=1;cam.yaw=ISO_YAW;cam.pitch=.98;cam.dist=24}
   player.dead=false;started=true;wasNight=isNight();
   for(const d of dinos)if(Math.hypot(d.x-player.x,d.z-player.z)<25&&d.T.beh!=='skittish')d.remove();
   renderHotbar();updateQuest();
@@ -1240,7 +1317,23 @@ function updatePlayer(dt){
   }
   const len=Math.hypot(ix,iy);if(len>1){ix/=len;iy/=len}
   const fx=-Math.sin(cam.yaw),fz=-Math.cos(cam.yaw),rx=Math.cos(cam.yaw),rz=-Math.sin(cam.yaw);
-  const mx=fx*iy+rx*ix,mz=fz*iy+rz*ix,moving=len>.08;
+  let mx=fx*iy+rx*ix,mz=fz*iy+rz*ix,moving=len>.08;
+  if(moving||placing)player.order=null;
+  player.orderReady=false;
+  const o=player.order;
+  if(o&&started&&!uiOpen()&&!sleeping){
+    const valid=!o.t||(o.t.dino?!o.t.dino.dead:o.t.node?o.t.node.active:buildings.includes(o.t.b));
+    if(!valid)player.order=null;
+    else{
+      let tx,tz,reach;
+      if(o.t){const ti=targetInfo(o.t);tx=ti.x;tz=ti.z;reach=ti.r+(o.t.dino?1.6:1.3)}else{tx=o.x;tz=o.z;reach=.35}
+      const dx=tx-player.x,dz=tz-player.z,d=Math.hypot(dx,dz);
+      if(d>reach){mx=dx/d;mz=dz/d;moving=true;
+        if(!o.t){if(d<o.best-.05){o.best=d;o.stuck=0}else if((o.stuck+=dt)>1.2)player.order=null}}
+      else if(o.t)player.orderReady=true;
+      else player.order=null;
+    }
+  }
   const ground=heightAt(player.x,player.z);player.swimming=ground<-.9;
   const sprint=(keys.ShiftLeft||keys.ShiftRight||touchRun)&&moving&&player.stamina>1&&!player.swimming;
   let speed=player.swimming?3:sprint?8.5:5;if(player.swing>0)speed*=.5;
@@ -1278,6 +1371,10 @@ function updatePlayer(dt){
   if(player.swing>0){player.swing-=dt;const pr=1-player.swing/.42;if(!player.swingHit&&pr>=.55){player.swingHit=true;if(player.swingTarget)applyHit(player.swingTarget)}}
   if(player.swing<=0){player.target=findTarget();player.tool=chooseTool(player.target)}
   if(player.swing<=0&&actionHeld&&!placing)doAction();
+  else if(player.orderReady&&player.swing<=0){
+    const t=player.order.t;player.target=t;player.tool=chooseTool(t);doAction();
+    if(t.b)player.order=null;
+  }
   for(const k in pm.tools)pm.tools[k].visible=k===player.tool;
   animatePlayer(dt,moving,sprint);
 }
@@ -1345,7 +1442,7 @@ function loop(now){
   elapsed+=dt;
   if(!paused){
     if(started)updateTime(dt);
-    updatePlayer(dt);
+    updatePointer(dt);updatePlayer(dt);
     for(let i=dinos.length-1;i>=0;i--)dinos[i]&&dinos[i].update(dt,elapsed);
     updateNodes(dt);respawnNodes(dt);updateParticles(dt);updatePlacing();
     popTick-=dt;for(const k in spawnCd)spawnCd[k]-=dt;if(popTick<=0){popTick=2;populate()}
