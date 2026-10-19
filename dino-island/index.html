@@ -189,6 +189,58 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
   .slot{width:44px;height:44px;font-size:21px}
   #toasts{top:auto;bottom:calc(320px + env(safe-area-inset-bottom,0px));width:calc(100vw - 32px)}
 }
+
+/* ---- compact HUD (overrides above) ---- */
+#leftcol{width:196px;gap:6px}
+#stats{padding:7px 9px;gap:5px}
+.bar{font-size:11px;gap:5px}
+.bar .ic{width:14px;font-size:11px}
+.track{height:7px}
+.bar b{width:22px;font-size:10px}
+#quest{font-size:11px;padding-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mats{padding:5px}
+#mats .mh{display:none}
+#matGrid{gap:3px}
+.mat{padding:2px 5px;gap:4px}
+.mat .e{font-size:13px}
+.mat .t small{display:none}
+.mat .t b{font-size:12px}
+#minimap{width:100px;height:100px}
+#clock{font-size:11px;padding:2px 8px}
+#hotbar{padding:4px;gap:4px}
+.slot{width:44px;height:44px;font-size:20px}
+.tool{width:30px;height:30px;font-size:15px}
+.rb{font-size:17px;padding:5px 9px}
+.rb small{font-size:9px}
+#hint{font-size:10px}
+/* touch: small stick + button cluster in the bottom corners, items between them */
+.touch #hint,.touch .tool,.touch .sep{display:none}
+.touch #stick{width:104px;height:104px;left:calc(16px + env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.touch #knob{left:30px;top:30px;width:40px;height:40px}
+.touch #tbtns{width:150px;height:116px;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+.touch #tAct{width:70px;height:70px;font-size:28px!important}
+.touch #tJump{right:80px;bottom:0;width:48px;height:48px;font-size:18px}
+.touch #tRun{right:12px;bottom:80px;width:42px;height:42px;font-size:18px}
+.touch #hotbar{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+.touch .slot{width:40px;height:40px;font-size:19px}
+.touch #rbtns{top:calc(12px + env(safe-area-inset-top,0px));bottom:auto;right:calc(124px + env(safe-area-inset-right,0px))}
+.touch #placebar{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+/* portrait phone: items sit above the stick/button row */
+@media (orientation:portrait){
+  .touch #hotbar{bottom:calc(138px + env(safe-area-inset-bottom,0px))}
+  .touch #placebar{bottom:calc(196px + env(safe-area-inset-bottom,0px))}
+  .touch #rbtns{top:calc(150px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px))}
+  #toasts{top:auto;bottom:calc(200px + env(safe-area-inset-bottom,0px));width:calc(100vw - 32px)}
+}
+/* short landscape screens (phones turned sideways) */
+@media (orientation:landscape) and (max-height:520px){
+  #leftcol{width:170px}
+  #minimap{width:76px;height:76px}
+  #clock{font-size:10px}
+  .touch #rbtns{right:calc(128px + env(safe-area-inset-right,0px))}
+  #toasts{width:min(360px,46vw)}
+  .toast{font-size:12px;padding:5px 10px}
+}
 @media (prefers-reduced-motion:reduce){.toast{animation:none}}
 </style>
 </head>
